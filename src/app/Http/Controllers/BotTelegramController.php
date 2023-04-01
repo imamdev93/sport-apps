@@ -50,7 +50,7 @@ class BotTelegramController extends Controller
             ]);
             $user->group()->attach($create->id, ['is_admin' => true]);
             $group = $create;
-        }else{
+        }elseif($webhook->getMessage()->chat->type == 'group'){
             $this->sendMessage($chatId, ' Bot hanya dapat digunakan di grup');
         }
 
