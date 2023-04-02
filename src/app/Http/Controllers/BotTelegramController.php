@@ -100,7 +100,6 @@ class BotTelegramController extends Controller
                             $response .= $this->formatText('%s' . PHP_EOL, '<b>/hapususer @user1 @user2 @user3 (dilakukan oleh admin grup)</b>');
                             $this->sendMessage($chatId, $response);
                             break;
-                       
                         case 'join':
                             $response .= $this->formatText('%s' . PHP_EOL, '<b>/join @user1 @user2 @user3 (default event aktif yg terakhir dibuat) </b>');
                             $this->sendMessage($chatId, $response);
@@ -200,10 +199,14 @@ class BotTelegramController extends Controller
                     $this->authorization($chatId, $user);
 
                     $group = $this->getGroup($chatId);
-                    $title = $replyMessage[1] ?? 'Fun Futsal';
-                    $location = $replyMessage[2] ?? 'Pasaga Unpar';
-                    $date = $replyMessage[3] ?? Carbon::now()->addDays(7)->format('Y-m-d');
-                    $time = $replyMessage[4] ?? '19';
+                    if(empty($replyMessage[1]) || empty($replyMessage[2]) || empty($replyMessage[3]) || empty($replyMessage[4])){
+                        $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8($failed, '<b> Format Salah. /tambahevent | (Nama Event) | (lokasi) | (Tanggal ex: Y-m-d) | (Jam ex: 19.00 - 20:00) </b>')));
+                        break;
+                    }
+                    $title = $replyMessage[1];
+                    $location = $replyMessage[2];
+                    $date = trim($replyMessage[3]);
+                    $time = $replyMessage[4];
 
                     $event = Event::create([
                         'group_id' => $group->id,
