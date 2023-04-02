@@ -87,7 +87,12 @@ class BotTelegramController extends Controller
                 if (!empty($getCommand[1])) {
                     $response = $this->formatText('%s' . PHP_EOL, '<b>Cara menggunakan command : </b>');
                     switch (trim($getCommand[1])) {
+                        case 'tambahevent':
+                            $response .= $this->formatText('%s' . PHP_EOL, '<b>/tambahevent | (Nama Event) | (lokasi) | (Tanggal ex: Y-m-d) | (Jam ex: 19.00 - 20:00) </b>');
+                            $this->sendMessage($chatId, $response);
+                            break;
                         case 'tambahuser':
+                            
                             $response .= $this->formatText('%s' . PHP_EOL, '<b>/tambahuser @user1 @user2 @user3 (dilakukan oleh admin grup)</b>');
                             $this->sendMessage($chatId, $response);
                             break;
@@ -95,10 +100,7 @@ class BotTelegramController extends Controller
                             $response .= $this->formatText('%s' . PHP_EOL, '<b>/hapususer @user1 @user2 @user3 (dilakukan oleh admin grup)</b>');
                             $this->sendMessage($chatId, $response);
                             break;
-                        case 'tambahevent':
-                            $response .= $this->formatText('%s' . PHP_EOL, '<b>/tambahevent | <Nama Event> | <Lokasi> |  <Tanggal> | <Jam> </b>');
-                            $this->sendMessage($chatId, $response);
-                            break;
+                       
                         case 'join':
                             $response .= $this->formatText('%s' . PHP_EOL, '<b>/join @user1 @user2 @user3 (default event aktif yg terakhir dibuat) </b>');
                             $this->sendMessage($chatId, $response);
@@ -108,7 +110,7 @@ class BotTelegramController extends Controller
                             $this->sendMessage($chatId, $response);
                             break;
                         case 'bayar':
-                            $response .= $this->formatText('%s' . PHP_EOL, '<b>/bayar <jumlah uang> @user1 @user2 @user3 </b>');
+                            $response .= $this->formatText('%s' . PHP_EOL, '<b>/bayar (jumlah uang) @user1 @user2 @user3 </b>');
                             $this->sendMessage($chatId, $response);
                             break;
                         case 'setadmin':
