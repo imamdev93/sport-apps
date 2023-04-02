@@ -77,6 +77,7 @@ class BotTelegramController extends Controller
                     'tambahuser' => 'Command untuk menambahkan user ke grup',
                     'hapususer' => 'Command untuk menghapus user dari grup',
                     'listuser' => 'Command untuk melihat daftar user terdaftar di grup',
+                    'ubahnama' => 'Command untuk merubah nama user',
                     'event' => 'Command untuk event yang sedang aktif',
                     'tambahevent' => 'Command untuk menambahkan event/acara',
                     'join' => 'Command untuk bergabung ke event/acara',
@@ -93,7 +94,6 @@ class BotTelegramController extends Controller
                             $this->sendMessage($chatId, $response);
                             break;
                         case 'tambahuser':
-                            
                             $response .= $this->formatText('%s' . PHP_EOL, '<b>/tambahuser @user1 @user2 @user3 (dilakukan oleh admin grup)</b>');
                             $this->sendMessage($chatId, $response);
                             break;
@@ -115,6 +115,10 @@ class BotTelegramController extends Controller
                             break;
                         case 'setadmin':
                             $response .= $this->formatText('%s' . PHP_EOL, '<b>/setadmin @user1 @user2 @user3 </b>');
+                            $this->sendMessage($chatId, $response);
+                            break;
+                        case 'ubahnama':
+                            $response .= $this->formatText('%s' . PHP_EOL, '<b>/ubahnama | nama (ex: Imam Fahmi) </b>');
                             $this->sendMessage($chatId, $response);
                             break;
                         case 'removeadmin':
@@ -420,6 +424,21 @@ class BotTelegramController extends Controller
 
                     $this->sendMessage($chatId, $messages);
                     DB::commit();
+                } catch (Exception $e) {
+                    DB::rollBack();
+                    $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8($failed, $e->getMessage())));
+                }
+                break;
+            case '/ubahnama':
+                try {
+                    $replyMessage = explode('|', $text->getMessage()->getText());
+                    if(empty($replyMessage[1])){
+                        $this->sendMessage($chatId, ' Silahkan masukan nama (ex : Lorem Ipsum)');
+                        break;
+                    }
+
+                    $user->update(['name' => trim($replyMessage[1])]);
+                    $this->sendMessage($chatId,  $this->unicodeToUtf8($success, ' ubah nama berhasil'));
                 } catch (Exception $e) {
                     DB::rollBack();
                     $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8($failed, $e->getMessage())));
