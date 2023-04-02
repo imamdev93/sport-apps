@@ -406,8 +406,8 @@ class BotTelegramController extends Controller
                 $this->sendMessage($chatId,  $this->unicodeToUtf8($success, ' reload success'));
                 break;
             default:
-                if (strpos($getCommand[0],'/') == false) {
-                    $this->sendMessage($chatId,  $this->unicodeToUtf8($failed, ' Ups Command tidak ada'));
+                if (strpos($getCommand[0],'/') == false && !empty($getCommand[0])) {
+                    $this->sendMessage($chatId,  $this->unicodeToUtf8($failed, strpos($getCommand[0],'/') == false));
                 }
                 break;
         }
