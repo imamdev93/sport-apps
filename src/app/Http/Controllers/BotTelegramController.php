@@ -77,6 +77,7 @@ class BotTelegramController extends Controller
                     'tambahuser' => 'Command untuk menambahkan user ke grup',
                     'hapususer' => 'Command untuk menghapus user dari grup',
                     'listuser' => 'Command untuk melihat daftar user terdaftar di grup',
+                    'event' => 'Command untuk event yang sedang aktif',
                     'tambahevent' => 'Command untuk menambahkan event/acara',
                     'join' => 'Command untuk bergabung ke event/acara',
                     'unjoin' => 'Command untuk batal bergabung ke event/acara',
@@ -140,6 +141,20 @@ class BotTelegramController extends Controller
                 }
                 $this->sendMessage($chatId, $messages);
                 break;
+            case '/event':
+                $event = $this->getEventActive($chatId);
+                if(!$event){
+                    $this->sendMessage($chatId, '<b> Belum ada event. klik /tambahevent untuk menambahkan event baru </b>');
+                    break;
+                }
+                $messages = $this->formatText('%s'.PHP_EOL, '<b>Event Aktif :</b>');
+                $messages .= $this->formatText('%s'.PHP_EOL, '');
+                $messages .= $this->formatText('%s'.PHP_EOL, "<b>Event : $event->title</b>");
+                $messages .= $this->formatText('%s'.PHP_EOL, "<b>Lokasi : $event->location</b>");
+                $messages .= $this->formatText('%s'.PHP_EOL, "<b>Tanggal : $event->date</b>");
+                $messages .= $this->formatText('%s'.PHP_EOL, "<b>Jam : $event->time WIB </b>");
+                $this->sendMessage($chatId, $messages);
+                break;
             // case '/tambahgrup':
             //     try {
             //         $exist = $this->getGroup($chatId);
@@ -165,7 +180,7 @@ class BotTelegramController extends Controller
                     $replyMessage = explode('@', $text->getMessage()->getText());
                     $messages = '';
                     $this->authorization($chatId, $user);
-                    $messages .= $this->formatText('<b> %s </b>' . PHP_EOL, 'User Behasil ditambahkan : ');
+                    $messages .= $this->formatText('<b> %s </b>' . PHP_EOL, 'Hasil : ');
                     if (count($replyMessage) == 1) {
                         $this->sendMessage($chatId, ' Silahkan masukan user (ex : /tambahuser @user1)');
                     } else {
@@ -180,10 +195,14 @@ class BotTelegramController extends Controller
                                     'password' => bcrypt($value),
                                 ]);
                                 $newUser->group()->attach($getGroup->id);
-                            } else {
-                                $userCheck->group()->where('chat_id', $chatId)->update(['group_id' => $getGroup->id]);
+                                $result = "@$newUser->username Berhasil";
+                            } elseif(!$userCheck->group()->where('chat_id', $chatId)->first()){
+                                $userCheck->group()->attach($getGroup->id);
+                                $result = "@$userCheck->username Berhasil";
+                            }else{
+                                $result = "@$userCheck->username Sudah Terdaftar";
                             }
-                            $messages .= $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8($success, " @$value berhasil"));
+                            $messages .= $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8($success, $result));
                         }
 
                         $this->sendMessage($chatId, $messages);
@@ -230,7 +249,7 @@ class BotTelegramController extends Controller
                 try {
                     $replyMessage = explode('@', $text->getMessage()->getText());
                     $this->authorization($chatId, $user);
-                    $messages = $this->formatText('<b> %s </b>' . PHP_EOL, 'User Behasil dihapus : ');
+                    $messages = $this->formatText('<b> %s </b>' . PHP_EOL, 'Hasil : ');
                     if (count($replyMessage) == 1) {
                         $this->sendMessage($chatId, ' Silahkan masukan user (ex : /hapususer @user1)');
                     } else {
@@ -259,7 +278,7 @@ class BotTelegramController extends Controller
                     $event = $this->getEventActive($chatId);
                     $participants = empty($replyMessage[1]) ? [$user->username] : explode('@', $text->getMessage()->getText());
                     if (!$event) {
-                        $this->sendMessage($chatId, ' Belum ada event tersedia');
+                        $this->sendMessage($chatId, ' Belum ada event tersedia. klik /tambahevent untuk menambahkan event baru');
                         break;
                     }
 
@@ -294,7 +313,7 @@ class BotTelegramController extends Controller
                 try {
                     $event = $this->getEventActive($chatId);
                     if (!$event) {
-                        $this->sendMessage($chatId, ' Belum ada event tersedia');
+                        $this->sendMessage($chatId, ' Belum ada event tersedia klik /tambahevent untuk menambahkan event baru');
                         break;
                     }
 
@@ -320,7 +339,7 @@ class BotTelegramController extends Controller
                     $amount = $replyMessage[1] ?? 20000;
                     $participants = empty($replyMessage[2]) ? [$user->username] : explode('@', $text->getMessage()->getText());
                     if (!$event) {
-                        $this->sendMessage($chatId, ' Belum ada event tersedia');
+                        $this->sendMessage($chatId, ' Belum ada event tersedia klik /tambahevent untuk menambahkan event baru');
                         break;
                     }
 
@@ -351,7 +370,7 @@ class BotTelegramController extends Controller
                         break;
                     }
 
-                    $messages = '';
+                    $messages = $this->formatText('%s'.PHP_EOL,'<b>Hasil :</b>');
                     unset($replyMessage[0]);
                     foreach ($replyMessage as $user) {
                         $cekUser = User::where('username', str_replace('@', '', $user))->first();
@@ -476,7 +495,7 @@ class BotTelegramController extends Controller
         $messages .= $this->formatText('%s' . PHP_EOL, '');
         $participants = $this->getParticipants($event->id);
 
-        $messages .= $this->formatText('<b>%s : </b>' . PHP_EOL, 'Yuk List Gaes');
+        $messages .= $this->formatText('<b>%s : </b>' . PHP_EOL, 'Yuk List Gaes. Klik /join untuk gabung.');
         if (count($participants) > 0) {
             foreach ($participants as $key => $participant) {
                 $no = $key + 1;
