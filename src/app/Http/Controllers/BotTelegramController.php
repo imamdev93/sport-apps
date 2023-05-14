@@ -576,6 +576,6 @@ class BotTelegramController extends Controller
 
     public function getEventUserExistNotIsPay($even_id, $user_id)
     {
-        return $this->getEventUserExist($even_id, $user_id)?->where('is_pay', false);
+        return $this->getEventUserExist($even_id, $user_id)?->where('is_pay', false)->first();
     }
 }
