@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0dfa40a70aa5e894ed80ee4f03282a5f",
+    "content-hash": "22350098ec92133a42c5cd0a2db441ce",
     "packages": [
         {
             "name": "biscolab/laravel-recaptcha",
@@ -2478,16 +2478,16 @@
         },
         {
             "name": "opcodesio/log-viewer",
-            "version": "v2.3.2",
+            "version": "v2.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opcodesio/log-viewer.git",
-                "reference": "938c3142339562d09293469f57053b31c54e92db"
+                "reference": "caddf3336e4a3c23e655e0c1a11b2ae8e6ab4c7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opcodesio/log-viewer/zipball/938c3142339562d09293469f57053b31c54e92db",
-                "reference": "938c3142339562d09293469f57053b31c54e92db",
+                "url": "https://api.github.com/repos/opcodesio/log-viewer/zipball/caddf3336e4a3c23e655e0c1a11b2ae8e6ab4c7d",
+                "reference": "caddf3336e4a3c23e655e0c1a11b2ae8e6ab4c7d",
                 "shasum": ""
             },
             "require": {
@@ -2550,9 +2550,9 @@
             ],
             "support": {
                 "issues": "https://github.com/opcodesio/log-viewer/issues",
-                "source": "https://github.com/opcodesio/log-viewer/tree/v2.3.2"
+                "source": "https://github.com/opcodesio/log-viewer/tree/v2.4.1"
             },
-            "time": "2023-03-19T11:03:34+00:00"
+            "time": "2023-04-05T05:44:00+00:00"
         },
         {
             "name": "phpoption/phpoption",
