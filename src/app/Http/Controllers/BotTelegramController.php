@@ -306,7 +306,7 @@ class BotTelegramController extends Controller
                             $eventUser = $user;
                         }
 
-                        $exist = $this->getEventUserExist($event->id, $eventUser?->id);
+                        $exist = $this->getEventUserExistNotIsPay($event->id, $eventUser?->id);
                         if (!$exist) {
                             EventUser::create([
                                 'user_id' => $eventUser->id,
@@ -342,7 +342,7 @@ class BotTelegramController extends Controller
 
                     foreach ($participants as $participant) {
                         $userUnjoin = User::where('username', $participant)->first();
-                        $exist = $this->getEventUserExist($event->id, $userUnjoin->id);
+                        $exist = $this->getEventUserExistNotIsPay($event->id, $userUnjoin->id);
                         if ($exist) {
                             $exist->delete();
                         }
@@ -371,7 +371,7 @@ class BotTelegramController extends Controller
 
                     foreach ($participants as $participant) {
                         $eventUser = User::where('username', $participant)->first();
-                        $exist = $this->getEventUserExist($event->id, $eventUser?->id);
+                        $exist = $this->getEventUserExistNotIsPay($event->id, $eventUser?->id);
                         if (!empty($participant) && $exist) {
                             $exist->update(['amount' => $amount, 'is_pay' => true]);
                         }
@@ -455,7 +455,7 @@ class BotTelegramController extends Controller
                 try {
                     $replyMessage = explode('|', $text->getMessage()->getText());
                     if(empty($replyMessage[1])){
-                        $this->sendMessage($group->chat_id, ' Silahkan masukan nama (ex : Lorem Ipsum)');
+                        $this->sendMessage($group->chat_id, ' Silahkan masukan nama (ex : /ubahnama | Lorem Ipsum)');
                         break;
                     }
 
@@ -569,6 +569,11 @@ class BotTelegramController extends Controller
 
     public function getEventUserExist($even_id, $user_id)
     {
-        return EventUser::where('user_id', $user_id)->where('event_id', $even_id)->where('is_pay', false)->first();
+        return EventUser::where('user_id', $user_id)->where('event_id', $even_id)->first();
+    }
+
+    public function getEventUserExistNotIsPay($even_id, $user_id)
+    {
+        return $this->getEventUserExist($even_id, $user_id)?->where('is_pay', false);
     }
 }
