@@ -306,7 +306,7 @@ class BotTelegramController extends Controller
                             $eventUser = $user;
                         }
 
-                        $exist = $this->getEventUserExistNotIsPay($event->id, $eventUser?->id);
+                        $exist = $this->getEventUserExistIsPay($event->id, $eventUser?->id);
                         if (!$exist) {
                             EventUser::create([
                                 'user_id' => $eventUser->id,
@@ -342,7 +342,7 @@ class BotTelegramController extends Controller
 
                     foreach ($participants as $participant) {
                         $userUnjoin = User::where('username', $participant)->first();
-                        $exist = $this->getEventUserExistNotIsPay($event->id, $userUnjoin->id);
+                        $exist = $this->getEventUserExistIsPay($event->id, $userUnjoin->id, false);
                         if ($exist) {
                             $exist->delete();
                         }
@@ -371,7 +371,7 @@ class BotTelegramController extends Controller
 
                     foreach ($participants as $participant) {
                         $eventUser = User::where('username', $participant)->first();
-                        $exist = $this->getEventUserExistNotIsPay($event->id, $eventUser?->id);
+                        $exist = $this->getEventUserExistIsPay($event->id, $eventUser?->id, false);
                         if (!empty($participant) && $exist) {
                             $exist->update(['amount' => $amount, 'is_pay' => true]);
                         }
@@ -569,13 +569,8 @@ class BotTelegramController extends Controller
         return Event::where('group_id', $group->id)->where('title', trim($event_name))->where('is_active', true)->first();
     }
 
-    public function getEventUserExist($even_id, $user_id)
+    public function getEventUserExistIsPay($even_id, $user_id, $is_pay = true)
     {
-        return EventUser::where('user_id', $user_id)->where('event_id', $even_id)->first();
-    }
-
-    public function getEventUserExistNotIsPay($even_id, $user_id)
-    {
-        return $this->getEventUserExist($even_id, $user_id)?->where('is_pay', false)->first();
+        return EventUser::where('user_id', $user_id)->where('event_id', $even_id)->where('is_pay', $is_pay)->first();
     }
 }
