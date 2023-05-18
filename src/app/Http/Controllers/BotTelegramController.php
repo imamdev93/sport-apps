@@ -46,7 +46,7 @@ class BotTelegramController extends Controller
         if (!$group) {
             $create = Group::create([
                 'chat_id' => $chatId,
-                'name' => $webhook->getMessage()->chat->title,
+                'name' => $webhook->getMessage()->chat->title ?? $user->username,
                 'created_by' => $user->id
             ]);
             $user->group()->attach($create->id, ['is_admin' => true]);
