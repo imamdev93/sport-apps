@@ -510,10 +510,7 @@ class BotTelegramController extends Controller
 
     public function getGroup($chatId, $name)
     {
-        $grup =  Group::where('chat_id', $chatId)->orWhere('name', $name)->first();
-        if ($grup) {
-            $updateGrup = $grup->update(['chat_id' => $chatId, 'name' => $name]);
-        }
+        $grup =  Group::where('chat_id', $chatId)->first();
         return $grup;
     }
 
