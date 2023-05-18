@@ -512,7 +512,7 @@ class BotTelegramController extends Controller
     {
         $grup =  Group::where('chat_id', $chatId)->orWhere('name', $name)->first();
         if ($grup) {
-            $grup->update(['chat_id' => $chatId, 'name' => $name]);
+            $updateGrup = $grup->update(['chat_id' => $chatId, 'name' => $name]);
         }
         return $grup;
     }
