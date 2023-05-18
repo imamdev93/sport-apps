@@ -34,7 +34,7 @@ class BotTelegramController extends Controller
         $user = User::where('username', $username)->first();
 
         if (!$user) {
-            User::create([
+            $user = User::create([
                 'name' => $username,
                 'username' => $username,
                 'password' => bcrypt($username)
@@ -57,7 +57,7 @@ class BotTelegramController extends Controller
         //     die();
         // }
 
-        if (count($user->group) == 0 && !$user->group()->where('chat_id', $group->chat_id)->first()) {
+        if (count($user->group->where('chat_id', $group->chat_id)) == 0) {
             $user->group()->attach($group->id);
         }
 
@@ -203,7 +203,7 @@ class BotTelegramController extends Controller
                                 ]);
                                 $newUser->group()->attach($group->id);
                                 $result = "@$newUser->username Berhasil";
-                            } elseif(!$userCheck->group()->where('chat_id', $chatId)->first()){
+                            } elseif (!$userCheck->group->where('chat_id', $chatId)->first()) {
                                 $userCheck->group()->attach($group->id);
                                 $result = "@$userCheck->username Berhasil";
                             }else{
@@ -473,7 +473,7 @@ class BotTelegramController extends Controller
                 break;
             default:
                 if (strpos($getCommand[0],'/') == false && !empty($getCommand[0])) {
-                    $this->sendMessage($group->chat_id,  $this->unicodeToUtf8($failed, strpos($getCommand[0], '/') == false));
+                    $this->sendMessage($group->chat_id,  $this->unicodeToUtf8($failed, 'Command tidak ada.'));
                 }
                 break;
         }
@@ -519,6 +519,8 @@ class BotTelegramController extends Controller
 
     public function authorization($chatId, $user)
     {
+        // $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8('\u274c', ' Ops anda tidak bisa akses')));
+
         $isAdmin = $user->group->where('chat_id', $chatId)->first()->pivot->is_admin;
         if (!$isAdmin) {
             $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8('\u274c', ' Ops anda tidak bisa akses')));
