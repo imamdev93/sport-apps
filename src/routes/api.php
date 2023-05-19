@@ -21,3 +21,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('set-webhook', [BotTelegramController::class, 'setWebhook']);
 Route::post('webhook', [BotTelegramController::class, 'getWebhookBot']);
+Route::get('remove-webhook', [BotTelegramController::class, 'removeWebhook']);
