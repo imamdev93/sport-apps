@@ -35,7 +35,6 @@ class BotTelegramController extends Controller
     public function authenticateUser($webhook)
     {
         $chatId = $webhook->getChat()->getId();
-        $username = $webhook->getMessage()->getFrom()->getUsername();
         $message = $webhook->message?->text;
         $commands = explode(' ', $message);
         $replyId = $webhook->message->message_id;
