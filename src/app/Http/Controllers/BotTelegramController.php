@@ -32,7 +32,7 @@ class BotTelegramController extends Controller
         $command = $webhook->getChat();
         $getText = $webhook->message?->text;
         $chatId = $command->getId();
-        $username = $webhook->message->from->username;
+        $username = $webhook->getMessage()->getFrom()->getUsername();
         $replyId = $webhook->message->message_id;
         $getCommand = explode(' ', $getText);
 
@@ -45,7 +45,7 @@ class BotTelegramController extends Controller
                 'password' => bcrypt($username)
             ]);
         }
-        // $this->sendMessage($chatId, $this->formatText('%s', $webhook->message->text), $webhook->message->message_id);
+        // $this->sendMessage($chatId, $this->formatText('%s', $webhook->getMessage()->getFrom()->getUsername()), $webhook->message->message_id);
 
         $group = $this->getGroup($chatId, $webhook->message->chat->title);
         if (!$group) {
