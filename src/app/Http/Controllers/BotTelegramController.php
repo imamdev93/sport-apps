@@ -40,15 +40,20 @@ class BotTelegramController extends Controller
         $commands = explode(' ', $message);
         $replyId = $webhook->message->message_id;
 
+        // $this->sendMessage($chatId, $this->formatText('%s', $webhook->message));
+        
         try {
-            $user = User::where('username', $username)->first();
+            $userInfo = $webhook->message->from;
+            $user = User::where('username', $userInfo->username)->orWhere('chat_id', $userInfo->username)->first();
 
             if (!$user) {
-                $user = User::create([
-                    'name' => $username,
-                    'username' => $username,
-                    'password' => bcrypt($username)
+                $user = User::create(['chat_id' => $userInfo->id,
+                    'name' => $userInfo->username,
+                    'username' => $userInfo->username,
+                    'password' => bcrypt($userInfo->username)
                 ]);
+            } else {
+                $updateUser = $user->update(['chat_id' => $userInfo->id, 'username' => $userInfo->username]);
             }
 
             $group = $this->getGroup($chatId);
@@ -90,7 +95,6 @@ class BotTelegramController extends Controller
                     'setadmin' => 'Menambahkan user jadi admin di grup bot',
                     'removeadmin' => 'Menghapus user jadi admin di grup bot',
                     'tambahuser' => 'Mmenambahkan user ke grup bot',
-                    // 'hapususer' => 'Command untuk menghapus user dari grup',
                     'listuser' => 'Melihat daftar user terdaftar di grup bot',
                     'ubahnama' => 'Merubah nama user',
                     'event' => 'Melihat event yang sedang aktif',
@@ -113,10 +117,6 @@ class BotTelegramController extends Controller
                             $response .= $this->formatText('%s' . PHP_EOL, '<b>/tambahuser @user1 @user2 @user3 (dilakukan oleh admin yg didaftarkan pada bot)</b>');
                             $this->sendMessage($group->chat_id, $response, $replyId);
                             break;
-                        // case 'hapususer':
-                        //     $response .= $this->formatText('%s' . PHP_EOL, '<b>/hapususer @user1 @user2 @user3 (dilakukan oleh admin grup)</b>');
-                        //     $this->sendMessage($group->chat_id, $response);
-                        //     break;
                         case 'join':
                             $response .= $this->formatText('%s' . PHP_EOL, '<b>/join @user1 @user2 @user3</b>');
                             $this->sendMessage($group->chat_id, $response, $replyId);
@@ -274,32 +274,6 @@ class BotTelegramController extends Controller
                     $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8($failed, $e->getMessage())), $replyId);
                 }
                 break;
-            // case '/hapususer':
-            //     try {
-            //         $replyMessage = explode('@', $message);
-            //         $this->authorization($group->chat_id, $user);
-            //         $responses = $this->formatText('<b> %s </b>' . PHP_EOL, 'Hasil : ');
-            //         if (count($replyMessage) == 1) {
-            //             $this->sendMessage($group->chat_id, ' Silahkan masukan user (ex : /hapususer @user1)');
-            //         } else {
-            //             unset($replyMessage[0]);
-            //             foreach ($replyMessage as $value) {
-            //                 $userCheck = User::where('username', $value)->first();
-            //                 $group = $this->getGroup($group->chat_id);
-            //                 if (!$userCheck) {
-            //                     $responses .= $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8($failed, " user tidak ditemukan"));
-            //                 } else {
-            //                     $userCheck->group()->detach($group->id);
-            //                     $responses .= $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8($success, " @$value berhasil"));
-            //                 }
-            //             }
-
-            //             $this->sendMessage($group->chat_id, $responses);
-            //         }
-            //     } catch (Exception $e) {
-            //         $this->sendMessage($group->chat_id, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8($failed, $e->getMessage())));
-            //     }
-            //     break;
             case '/join':
                 $replyMessage = explode(' ', $message);
                 DB::beginTransaction();
