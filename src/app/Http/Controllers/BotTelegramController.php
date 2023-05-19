@@ -40,7 +40,8 @@ class BotTelegramController extends Controller
         $replyId = $webhook->message?->message_id;
 
         // $this->sendMessage($chatId, $this->formatText('%s', $webhook->message));
-        
+
+        DB::beginTransaction();
         try {
             $userInfo = $webhook->message->from;
             $user = User::where('username', $userInfo->username)->orWhere('chat_id', $userInfo->username)->first();
@@ -71,7 +72,9 @@ class BotTelegramController extends Controller
             }
 
             $this->executeCommandBot($chatId, $commands, $message, $user, $group, $replyId);
+            DB::commit();
         } catch (\Exception $e) {
+            DB::rollBack();
             $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8('\u274c', $e->getMessage())), $replyId);
         }
     }
@@ -476,10 +479,15 @@ class BotTelegramController extends Controller
 
     public function sendMessage($chatId, $message, $fromId = null)
     {
-        Telegram::sendMessage([
-            'chat_id' => $chatId, 'text' => $message, 'parse_mode' => 'html',
-            'reply_to_message_id' => $fromId
-        ]);
+        try {
+            Telegram::sendMessage([
+                'chat_id' => $chatId, 'text' => $message, 'parse_mode' => 'html',
+                'reply_to_message_id' => $fromId
+            ]);
+        } catch (\Exception $e) {
+            $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8('\u274c', $e->getMessage())), $fromId);
+        }
+      
     }
 
     public function unicodeToUtf8($string, $message)
