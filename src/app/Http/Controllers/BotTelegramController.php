@@ -20,6 +20,11 @@ class BotTelegramController extends Controller
         Telegram::setWebhook(['url' => config('telegram.bots.mybot.webhook_url')]);
     }
 
+    public function removeWebhook()
+    {
+        Telegram::removeWebhook();
+    }
+
     public function getWebhookBot()
     {
         $webhook =  Telegram::commandsHandler(true);
@@ -27,7 +32,7 @@ class BotTelegramController extends Controller
         $command = $webhook->getChat();
         $getText = $webhook->message?->text;
         $chatId = $command->getId();
-        $username = $webhook->message?->from->username;
+        $username = $webhook->message->from->username;
         $getCommand = explode(' ', $getText);
         $failed = '\u274c';
 
@@ -40,7 +45,7 @@ class BotTelegramController extends Controller
                 'password' => bcrypt($username)
             ]);
         }
-        // $this->sendMessage($chatId, $this->formatText('%s', $webhook->message?->text));
+        // $this->sendMessage($chatId, $this->formatText('%s', $webhook->message->from->username));
 
         $group = $this->getGroup($chatId, $webhook->message->chat->title);
         if (!$group) {
