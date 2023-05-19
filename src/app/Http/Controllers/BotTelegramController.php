@@ -37,7 +37,7 @@ class BotTelegramController extends Controller
         $chatId = $webhook->getChat()->getId();
         $message = $webhook->message?->text;
         $commands = explode(' ', $message);
-        $replyId = $webhook->message->message_id;
+        $replyId = $webhook->message?->message_id;
 
         // $this->sendMessage($chatId, $this->formatText('%s', $webhook->message));
         
