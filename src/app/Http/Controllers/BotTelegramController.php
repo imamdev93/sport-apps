@@ -479,13 +479,15 @@ class BotTelegramController extends Controller
 
     public function sendMessage($chatId, $message, $fromId = null)
     {
-        try {
+        if ($fromId) {
             Telegram::sendMessage([
                 'chat_id' => $chatId, 'text' => $message, 'parse_mode' => 'html',
                 'reply_to_message_id' => $fromId
             ]);
-        } catch (\Exception $e) {
-            $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8('\u274c', $e->getMessage())), $fromId);
+        } else {
+            Telegram::sendMessage([
+                'chat_id' => $chatId, 'text' => $message, 'parse_mode' => 'html'
+            ]);
         }
       
     }
