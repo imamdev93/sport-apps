@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 use Str;
 
 class BotTelegramController extends Controller
@@ -144,7 +145,7 @@ class BotTelegramController extends Controller
                             $this->sendMessage($group->chat_id, $response, $replyId);
                             break;
                         default:
-                            $this->sendMessage($group->chat_id, '<b>help command tidak ditemukan </b>');
+                            $this->sendMessage($group->chat_id, '<b>help command tidak ditemukan </b>', $replyId);
                             break;
                     }
                 } else {
@@ -211,7 +212,7 @@ class BotTelegramController extends Controller
                 try {
                     $replyMessage = explode('@', $message);
                     $responses = '';
-                    $this->authorization($group->chat_id, $user);
+                    $this->authorization($group->chat_id, $user, $replyId);
                     $responses .= $this->formatText('<b> %s </b>' . PHP_EOL, 'Hasil : ');
                     if (count($replyMessage) == 1) {
                         $this->sendMessage($group->chat_id, ' Silahkan masukan user (ex : /tambahuser @user1)', $replyId);
@@ -246,7 +247,7 @@ class BotTelegramController extends Controller
                 DB::beginTransaction();
                 try {
                     $replyMessage = explode('|', $message);
-                    $this->authorization($chatId, $user);
+                    $this->authorization($chatId, $user, $replyId);
 
                     // $group = $this->getGroup($chatId);
                     if(empty($replyMessage[1]) || empty($replyMessage[2]) || empty($replyMessage[3]) || empty($replyMessage[4])){
@@ -359,7 +360,7 @@ class BotTelegramController extends Controller
                 $replyMessage = explode(' ', $message);
                 DB::beginTransaction();
                 try {
-                    $this->authorization($group->chat_id, $user);
+                    $this->authorization($group->chat_id, $user, $replyId);
                     $event = $this->getEventActive($group);
                     $amount = $replyMessage[1] ?? 20000;
                     $participants = empty($replyMessage[2]) ? [$user->username] : explode('@', $message);
@@ -389,7 +390,7 @@ class BotTelegramController extends Controller
                 DB::beginTransaction();
                 try {
                     $replyMessage = explode(' ', $message);
-                    $this->authorization($group->chat_id, $user);
+                    $this->authorization($group->chat_id, $user, $replyId);
                     if (empty($replyMessage[1])) {
                         $this->sendMessage($group->chat_id, ' Silahkan masukan username yang akan dijadikan admin ( ex: /setadmin @user)', $replyId);
                         break;
@@ -424,7 +425,7 @@ class BotTelegramController extends Controller
                 DB::beginTransaction();
                 try {
                     $replyMessage = explode(' ', $message);
-                    $this->authorization($group->chat_id, $user);
+                    $this->authorization($group->chat_id, $user, $replyId);
                     if (empty($replyMessage[1])) {
                         $this->sendMessage($group->chat_id, ' Silahkan masukan username yang akan dihapus menjadi admin ( ex: /removeadmin @user)', $replyId);
                         break;
@@ -477,16 +478,16 @@ class BotTelegramController extends Controller
         }
     }
 
-    public function sendMessage($chatId, $message, $fromId = null)
+    public function sendMessage($chatId, $message, $fromId)
     {
-        try {
-            Telegram::sendMessage([
-                'chat_id' => $chatId, 'text' => $message, 'parse_mode' => 'html',
-                'reply_to_message_id' => $fromId
-            ]);
-        } catch (\Exception $e) {
-            die();
-        }
+        $botToken = config('telegram.bots.mybot.token');
+
+        Http::post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+            'chat_id' => $chatId,
+            'text' => $message,
+            'reply_to_message_id' => $fromId,
+            'parse_mode' => 'html',
+        ]);
       
     }
 
@@ -516,13 +517,13 @@ class BotTelegramController extends Controller
         return $grup;
     }
 
-    public function authorization($chatId, $user)
+    public function authorization($chatId, $user, $replyId)
     {
         // $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8('\u274c', ' Ops anda tidak bisa akses')));
 
         $isAdmin = $user->group->where('chat_id', $chatId)->first()->pivot->is_admin;
         if (!$isAdmin) {
-            $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8('\u274c', ' Ops anda tidak bisa akses')));
+            $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8('\u274c', ' Ops anda tidak bisa akses')), $replyId);
             die();
         }
     }
