@@ -107,6 +107,8 @@ class BotController extends Controller
                 $responses .= $this->formatText('<b>%s</b> ' . PHP_EOL, $this->unicodeToUtf8('&#128179;', ' 108127135337 (Bank Jago a.n Rachadian Novansyah) '));
                 $responses .= $this->formatText('%s' . PHP_EOL, '');
 
+                $teams = [];
+                
                 foreach ($members as $value) {
                     for ($i = 1; $i <= $totalTeam; $i++) {
                         if ($i == $value->row_num) {
