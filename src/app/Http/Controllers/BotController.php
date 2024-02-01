@@ -80,8 +80,20 @@ class BotController extends Controller
                 break;
             case '/random':
                 $getTotalTeam = explode(' ', $message);
-                $totalTeam = $getTotalTeam[1] ?? 5;
 
+                $totalTeam = 5;
+                $isFG = false;
+
+                if (!empty($getTotalTeam[1]) && is_numeric($getTotalTeam[1])) {
+                    $totalTeam = $getTotalTeam[1];
+                }
+
+                if (!empty($getTotalTeam[1]) && strtoupper($getTotalTeam[1]) == 'FG') {
+                    $isFG = true;
+                } elseif (!empty($getTotalTeam[2]) && strtoupper($getTotalTeam[2]) == 'FG') {
+                    $isFG = true;
+                }
+                
                 $responses = '';
                 $members = DB::table(
                     DB::raw(
@@ -97,14 +109,25 @@ class BotController extends Controller
                 // Get the date for the next Wednesday
                 $nextWednesday = $currentDate->next(Carbon::WEDNESDAY)->translatedFormat('l, d F Y');
 
+                $weekOfMonth = $currentDate->weekOfMonth;
+                $monthAndYear = $currentDate->translatedFormat('F Y');
+
+                $eventName = `Fun Game GW $weekOfMonth $monthAndYear`;
+                if ($weekOfMonth == 1) {
+                    $eventName = "Trofeo JDS FC $monthAndYear";
+                }
+
                 $success = '\u2705';
 
-                $responses = $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#127942;', ' Fun Game'));
+                $responses = $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#127942;', $eventName));
                 $responses .= $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#127967;', ' BIS Dragons (https://g.co/kgs/4MqwnS) '));
                 $responses .= $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#128467;', ' ' . $nextWednesday));
                 $responses .= $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#9200;', ' 18.30 - 21.30 WIB'));
                 $responses .= $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#128184;', ' Non Member 35k'));
                 $responses .= $this->formatText('<b>%s</b> ' . PHP_EOL, $this->unicodeToUtf8('&#128179;', ' 108127135337 (Bank Jago a.n Rachadian Novansyah) '));
+                if ($isFG) {
+                    $responses .= $this->formatText('<b>%s</b> ' . PHP_EOL, $this->unicodeToUtf8('&#128248;', ' Rafa Images (https://instagram.com/rafa.images)  '));
+                }
                 $responses .= $this->formatText('%s' . PHP_EOL, '');
 
                 $teams = [];
