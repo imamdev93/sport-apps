@@ -112,7 +112,7 @@ class BotController extends Controller
                 $weekOfMonth = $currentDate->weekOfMonth;
                 $monthAndYear = $currentDate->translatedFormat('F Y');
 
-                $eventName = `Fun Game GW $weekOfMonth $monthAndYear`;
+                $eventName = "Fun Game GW " . $weekOfMonth . " " . $monthAndYear;
                 if ($weekOfMonth == 1) {
                     $eventName = "Trofeo JDS FC $monthAndYear";
                 }
