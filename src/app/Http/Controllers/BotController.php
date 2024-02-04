@@ -172,8 +172,8 @@ class BotController extends Controller
                 $this->sendMessage($chatId, $this->unicodeToUtf8($success, ' reload success'), $replyId);
                 break;
             default:
-                if (strpos($command[0], '/') == false && !empty($command[0])) {
-                    $this->sendMessage($chatId, $this->unicodeToUtf8($failed, 'Command tidak ada.'), $replyId);
+                if (strpos($command[0], '/') !== false && !empty($command[0])) {
+                    $this->sendMessage($chatId, $this->unicodeToUtf8($failed, 'Maaf, Command tidak ditemukan. /help untuk melihat command yang bisa digunakan'), $replyId);
                 }
                 break;
         }
