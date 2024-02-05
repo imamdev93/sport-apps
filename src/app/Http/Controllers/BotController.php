@@ -167,6 +167,22 @@ class BotController extends Controller
 
                 $this->sendMessage($chatId, $responses, $replyId);
                 break;
+            case '/generate-report':
+                $username = $commands[1] ?? null;
+                $password = $commands[2] ?? null;
+
+                if (empty($username) || empty($password)) {
+                    $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8($failed, '/generate-report (username/email) (password)')), $replyId);
+                }
+
+                $getBody = Http::post("https://n8n.digitalservice.id/webhook/ec14c8d2-2037-4286-a041-8d5616371f53", [
+                    'username' => $commands[1],
+                    'password' => $commands[2],
+                ]);
+                $response = json_decode($getBody);
+                $this->sendMessage($chatId, $this->unicodeToUtf8($success, ' Hai ' . $response->user . ', ' . $response->message), $replyId);
+
+                break;
             case '/reload':
                 $this->setWebhook();
                 $this->sendMessage($chatId, $this->unicodeToUtf8($success, ' reload success'), $replyId);
