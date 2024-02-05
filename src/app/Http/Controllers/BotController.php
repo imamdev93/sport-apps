@@ -181,7 +181,7 @@ class BotController extends Controller
                     'password' => $commands[2],
                 ]);
                 $response = json_decode($getBody);
-                $this->sendMessage($chatId, $this->unicodeToUtf8($success, ' Hai ' . $response->user . ', ' . $response->message), $replyId);
+                $this->sendMessage($chatId, $this->unicodeToUtf8($success, $response?->message), $replyId);
 
                 break;
             case '/reload':
