@@ -173,6 +173,7 @@ class BotController extends Controller
 
                 if (empty($username) || empty($password)) {
                     $this->sendMessage($chatId, $this->formatText('%s' . PHP_EOL, $this->unicodeToUtf8($failed, '/generate-report (username/email) (password)')), $replyId);
+                    break;
                 }
 
                 $getBody = Http::post("https://n8n.digitalservice.id/webhook/ec14c8d2-2037-4286-a041-8d5616371f53", [
