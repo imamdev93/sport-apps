@@ -79,40 +79,27 @@ class BotController extends Controller
                 $this->sendMessage($chatId, $responses, $replyId);
                 break;
             case '/random':
-                $getTotalTeam = explode(' ', $message);
+                $totalTeam = $this->header($commands)['team'];
+                $isFG = $this->header($commands)['fg'];
+                $date = Carbon::parse($this->header($commands)['date']);
+                $time = $this->header($commands)['time'];
+                $pay = $this->header($commands)['pay'];
 
-                $totalTeam = 5;
-                $isFG = false;
-
-                if (!empty($getTotalTeam[1]) && is_numeric($getTotalTeam[1])) {
-                    $totalTeam = $getTotalTeam[1];
-                }
-
-                if (!empty($getTotalTeam[1]) && strtoupper($getTotalTeam[1]) == 'FG') {
-                    $isFG = true;
-                } elseif (!empty($getTotalTeam[2]) && strtoupper($getTotalTeam[2]) == 'FG') {
-                    $isFG = true;
-                }
-                
                 $responses = '';
                 $members = DB::table(
                     DB::raw(
-                        '(SELECT name,is_member, ROW_NUMBER() OVER (PARTITION BY position ORDER BY RAND()) AS row_num FROM users) AS ranked'
+                        '(SELECT name,is_member, position, ROW_NUMBER() OVER (PARTITION BY position ORDER BY RAND()) AS row_num FROM users) AS ranked'
                     )
                 )
                     ->where('row_num', '<=', $totalTeam)
                     ->where('is_member', true)
                     ->get();
 
-                // Get the current date
-                $currentDate = Carbon::now();
-                // Get the date for the next Wednesday
-                $nextWednesday = $currentDate->next(Carbon::WEDNESDAY)->translatedFormat('l, d F Y');
+                $customDate = Carbon::parse($date)->translatedFormat('l, d F Y');
+                $weekOfMonth = Carbon::parse($date)->weekOfMonth;
+                $monthAndYear = Carbon::parse($date)->translatedFormat('F Y');
 
-                $weekOfMonth = $currentDate->weekOfMonth;
-                $monthAndYear = $currentDate->translatedFormat('F Y');
-
-                $eventName = "Fun Game GW " . $weekOfMonth . " " . $monthAndYear;
+                $eventName = "Fun Game GW " . $weekOfMonth . " Bulan " . $monthAndYear;
                 if ($weekOfMonth == 1) {
                     $eventName = "Trofeo JDS FC $monthAndYear";
                 }
@@ -121,9 +108,9 @@ class BotController extends Controller
 
                 $responses = $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#127942;', $eventName));
                 $responses .= $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#127967;', ' BIS Dragons (https://g.co/kgs/4MqwnS) '));
-                $responses .= $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#128467;', ' ' . $nextWednesday));
-                $responses .= $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#9200;', ' 18.30 - 21.30 WIB'));
-                $responses .= $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#128184;', ' Non Member 35k'));
+                $responses .= $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#128467;', ' ' . $customDate));
+                $responses .= $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#9200;', ' ' . $time . ' WIB'));
+                $responses .= $this->formatText('<b>%s</b>' . PHP_EOL, $this->unicodeToUtf8('&#128184;', ' Non Member ' . $pay));
                 $responses .= $this->formatText('<b>%s</b> ' . PHP_EOL, $this->unicodeToUtf8('&#128179;', ' 108127135337 (Bank Jago a.n Rachadian Novansyah) '));
                 if ($isFG) {
                     $responses .= $this->formatText('<b>%s</b> ' . PHP_EOL, $this->unicodeToUtf8('&#128248;', ' Rafa Images (https://instagram.com/rafa.images)  '));
@@ -133,14 +120,16 @@ class BotController extends Controller
                 $teams = [];
                 
                 foreach ($members as $value) {
+                    $position = $this->mappingPosition($value->position);
                     for ($i = 1; $i <= $totalTeam; $i++) {
                         if ($i == $value->row_num) {
-                            $teams[$i][] = $value->name;
+                            $teams[$i][] = $value->name . ' (' . $position . ')';
                         }
                     }
                 }
 
                 $alphabet = ['A', 'B', 'C', 'D', 'E'];
+                
 
                 foreach ($teams as $key => $team) {
                     $teamName = $alphabet[$key - 1] ?? 'F';
@@ -230,5 +219,59 @@ class BotController extends Controller
     public function formatText($format, $message1, $message2 = null)
     {
         return sprintf($format, $message1, $message2);
+    }
+
+    private function mappingPosition($position)
+    {
+        $label = 'KIPER';
+
+        if (in_array($position, [2, 3, 4])) {
+            $label = 'BEK';
+        } elseif (in_array($position, [5, 6])) {
+            $label = 'TENGAH';
+        } elseif (in_array($position, [7, 8])) {
+            $label = 'DEPAN';
+        }
+
+        return $label;
+    }
+
+    private function header($commands)
+    {
+        // Get the current date
+        $currentDate = Carbon::now();
+        // Get the date for the next Wednesday
+        $date = $currentDate->next(Carbon::WEDNESDAY)->translatedFormat('Y-m-d');
+
+        $result = [
+            'team' => 5,
+            'fg' => false,
+            'date' => $date,
+            'time' => '18.30-21.30',
+            'pay' => '35k'
+        ];
+
+        $regex = "/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/";
+
+        for ($i = 1; $i <= count($commands); $i++) {
+            if (!empty($commands[$i])) {
+                if (is_numeric($commands[$i])) {
+                    $result['team'] = $commands[$i];
+                } elseif (strtoupper($commands[$i] == 'FG')) {
+                    $result['fg'] = true;
+                } elseif (preg_match($regex, $commands[$i])) {
+                    $result['date'] = $commands[$i];
+                } elseif (strpos($commands[$i], '.')) {
+                    $result['time'] = $commands[$i];
+                } elseif (
+                    strpos($commands[$i], 'k') ||
+                    strpos($commands[$i], 'rb')
+                ) {
+                    $result['pay'] = $commands[$i];
+                }
+            }
+        }
+
+        return $result;
     }
 }
