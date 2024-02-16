@@ -7,7 +7,7 @@ ARG PHP_VERSION="8.2.3-r0"
 
 # Install packages
 RUN apk --no-cache add php82 php82-opcache php82-openssl php82-curl php82-phar php82-session \
-    php82-fileinfo php82-pdo php82-pdo_mysql php82-mbstring php82-dom php82-xml php82-xmlwriter php82-sodium \
+    php82-fileinfo php82-pdo_pgsql php82-pdo php82-pdo_mysql php82-mbstring php82-dom php82-xml php82-xmlwriter php82-sodium \
     php82-tokenizer php82-posix curl php82-iconv
 
 # Symlink php82 => php
