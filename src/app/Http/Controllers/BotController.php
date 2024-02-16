@@ -91,9 +91,8 @@ class BotController extends Controller
                         '(SELECT 
                         name,
                         is_member, 
-                        position, 
-                        char(ascii(row_number() over (PARTITION BY position ORDER BY RAND()))+48) AS alphabet, 
-                        (row_number() over (PARTITION BY position ORDER BY RAND())) AS row_num
+                        position,
+                        ROW_NUMBER() OVER (PARTITION BY position ORDER BY RANDOM()) AS row_num
                         FROM users) 
                         AS ranked'
                     )
@@ -122,19 +121,27 @@ class BotController extends Controller
                 }
                 $responses .= $this->formatText('%s' . PHP_EOL, '');
 
-                foreach ($members as $key => $value) {
-                    $index = $key + 1;
-                    $position = $this->mappingPosition($value->position);
-                    if (($index % 8) == 1) {
-                        $responses .= $this->formatText('<b>%s</>' . PHP_EOL, 'TIM ' . strtoupper($value->alphabet));
-                        $responses .= $this->formatText('%s' . PHP_EOL, $value->position . '. ' . $value->name . ' (' . $position . ')');
-                    } elseif (($index % 8) != 1) {
-                        $responses .= $this->formatText('%s' . PHP_EOL, $value->position . '. ' . $value->name . ' (' . $position . ')');
-                    }
+                $teams = [];
+                $alphabet = ['A', 'B', 'C', 'D', 'E'];
 
-                    if (($index % 8) == 0) {
-                        $responses .= $this->formatText('%s' . PHP_EOL, '');
+                foreach ($members as $value) {
+                    $position = $this->mappingPosition($value->position);
+                    for ($i = 1; $i <= $totalTeam; $i++) {
+                        if ($i == $value->row_num) {
+                            $teams[$i][] = $value->name . ' (' . $position . ')';
+                        }
                     }
+                }
+
+                foreach ($teams as $key => $team) {
+                    $teamName = $alphabet[$key - 1] ?? 'F';
+                    $no = 1;
+                    $responses .= $this->formatText('<b>%s</>' . PHP_EOL, 'TIM ' . $teamName);
+                    foreach ($team as $value) {
+                        $responses .= $this->formatText('%s' . PHP_EOL, $no++ . '. ' . $value);
+                    }
+                    $responses .= $this->formatText('%s' . PHP_EOL, '');
+                    $no = 0;
                 }
 
                 $players = $totalTeam * 7;
