@@ -6,30 +6,28 @@ services:
       context: ../
       dockerfile: ./docker/Dockerfile
     container_name: "sport_app"
+    depends_on:
+      - db
     ports:
       - "82:81"
     networks:
-      - network-local
-
-  mysql:
-    image: mysql:latest
-    container_name: sport_mysql
-    platform: linux/x86_64
+      - atanapi_network
+  db:
+    image: postgres:14
+    container_name: postgres
     restart: unless-stopped
-    tty: true
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - ./.env
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - network-local
+      - atanapi_network
 
 volumes:
-  mysql_data:
+  postgres_data:
 
 networks:
-  network-local:
+  atanapi_network:
     external: true
