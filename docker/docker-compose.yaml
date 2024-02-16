@@ -7,13 +7,13 @@ services:
       dockerfile: ./docker/Dockerfile
     container_name: "sport_app"
     ports:
-      - "81:81"
+      - "82:81"
     networks:
       - network-local
 
   mysql:
     image: mysql:latest
-    container_name: mysql
+    container_name: sport_mysql
     platform: linux/x86_64
     restart: unless-stopped
     tty: true
