@@ -37,5 +37,5 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN composer install --no-cache --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress
 
 # Expose the port app is reachable on
-CMD php artisan serve --host=0.0.0.0 --port=80
-EXPOSE 80
+CMD php artisan serve --host=0.0.0.0 --port=81
+EXPOSE 81
