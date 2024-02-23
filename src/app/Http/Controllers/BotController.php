@@ -173,7 +173,10 @@ class BotController extends Controller
                 ]);
                 $response = json_decode($getBody);
                 $this->sendMessage($chatId, $this->unicodeToUtf8($success, $response?->message), $replyId);
-
+                Log::info('Generate Report', [
+                    'message' => $response?->message,
+                    'data' => $commands[1]
+                ]);
                 break;
             case '/reload':
                 $this->setWebhook();
