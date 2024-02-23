@@ -171,10 +171,26 @@ class BotController extends Controller
                     'username' => $commands[1],
                     'password' => $commands[2],
                 ]);
-                $response = json_decode($getBody);
-                $this->sendMessage($chatId, $this->unicodeToUtf8($success, $response?->message), $replyId);
+                $response = json_decode($getBody, true);
+                $jsonString = stripslashes($response['message']);
+                $emoji = $success;
+                $responMessage = $response['message'];
+
+                $userNotFound = stripos($jsonString, 'user not found');
+                if ($userNotFound) {
+                    $emoji = $failed;
+                    $responMessage = 'username ' . $commands[1] . ' tidak ditemukan';
+                }
+
+                $wrongPassword = stripos($jsonString, 'wrong password');
+                if ($wrongPassword) {
+                    $emoji = $failed;
+                    $responMessage = 'Password salah';
+                }
+
+                $this->sendMessage($chatId, $this->unicodeToUtf8($emoji, $responMessage), $replyId);
                 Log::info('Generate Report', [
-                    'message' => $response?->message,
+                    'message' => $responMessage,
                     'data' => $commands[1]
                 ]);
                 break;
@@ -199,7 +215,7 @@ class BotController extends Controller
                 'chat_id' => $chatId,
                 'text' => $message,
                 'reply_to_message_id' => $fromId,
-                'parse_mode' => 'html',
+                // 'parse_mode' => 'html',
             ]);
         } catch (\Exception $e) {
             Log::info($e->getMessage());
