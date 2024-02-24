@@ -215,7 +215,7 @@ class BotController extends Controller
                 'chat_id' => $chatId,
                 'text' => $message,
                 'reply_to_message_id' => $fromId,
-                // 'parse_mode' => 'html',
+                'parse_mode' => 'html',
             ]);
         } catch (\Exception $e) {
             Log::info($e->getMessage());
